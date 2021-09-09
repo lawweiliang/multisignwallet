@@ -10,7 +10,7 @@ contract('MultisignWallet Testing', async([alice, bob, admin, dev, minter]) => {
     multiSignWallet = await multiSignWalletContract.new([alice, bob, admin], 2);  
     // multiSignWallet =   await multiSignWalletContract.deployed();
     //  console.log('addressTest--> ', multiSignWallet.address)
-     await web3.eth.sendTransaction({from: alice,to: multiSignWallet.address, value: oneEther})
+     await multiSignWallet.sendTransaction({from: alice,to: multiSignWallet.address, value: oneEther})
   });
 
   it('Contract Have 1 Ether', async () => {
@@ -19,8 +19,12 @@ contract('MultisignWallet Testing', async([alice, bob, admin, dev, minter]) => {
   });
 
   it.only('Contract receive ethereum event', async () =>{
-    const receipt =  await multiSignWallet.sendTransaction({from: bob, to: multiSignWallet.address, value: oneEther});
-    // const receipt =  await multiSignWallet.send(web3.utils.toWei(1, "ether"));
+
+    //Bob sent transaction to the contract
+    // const receipt =  await multiSignWallet.sendTransaction({from: bob, to: multiSignWallet.address, value: oneEther});
+    
+    //Alice sent transaction to the contract
+    const receipt =  await multiSignWallet.send(web3.utils.toWei('1', "ether"));
 
     expectEvent(receipt,'SmartContractReceivedEth', {sender: bob, amount: oneEther, message:'Smart contract received ETHEREUM'})
   });
