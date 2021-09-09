@@ -88,8 +88,10 @@ contract MultiSignWallet {
         return address(this).balance;
     }
     
-    // function invest() external payable{
-    //     emit SmartContractReceivedEth(msg.sender, msg.value, "Smart contract received ETHEREUM");
-    // }
+
+    //Insert eth using remix
+/*     function invest() external payable{
+        emit SmartContractReceivedEth(msg.sender, msg.value, "Smart contract received ETHEREUM");
+    } */
     
 }

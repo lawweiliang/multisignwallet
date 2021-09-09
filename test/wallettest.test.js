@@ -1,10 +1,10 @@
-const {BN, constants, expectEvent, expectRevert} = require('@openzeppelin/test-helpers');
+const {BN, ether, constants, expectEvent, expectRevert} = require('@openzeppelin/test-helpers');
 
 const multiSignWalletContract = artifacts.require('Multisignwallet');
 
 contract('MultisignWallet Testing', async([alice, bob, admin, dev, minter]) => {
   let multiSignWallet;
-  let oneEther = '1000000000000000000';
+  let oneEther = new ether(new BN(1));
   
   beforeEach(async ()=>{
     multiSignWallet = await multiSignWalletContract.new([alice, bob, admin], 2);  
@@ -13,29 +13,19 @@ contract('MultisignWallet Testing', async([alice, bob, admin, dev, minter]) => {
      await web3.eth.sendTransaction({from: alice,to: multiSignWallet.address, value: oneEther})
   });
 
-  it.only('Contract Have 1 Ether', async () => {
+  it('Contract Have 1 Ether', async () => {
     const walletBal = await web3.eth.getBalance(multiSignWallet.address);
-    // assert.equal(walletBal, oneEther);
-    // assert.equal(walletBal, '2');
-    assert(walletBal == '2');
+    assert.equal(walletBal, oneEther);
   });
 
-/*   it.only('Contract receive ethereum event', async () =>{
-    const receipt = await web3.eth.sendTransaction({from: bob, to: multiSignWallet.address, value: oneEther})
-    .on('confirmation', (confirmNo, receipt)=>{
+  it.only('Contract receive ethereum event', async () =>{
+    const receipt =  await multiSignWallet.sendTransaction({from: bob, to: multiSignWallet.address, value: oneEther});
+    // const receipt =  await multiSignWallet.send(web3.utils.toWei(1, "ether"));
 
-      console.log('confirmNo', confirmNo);
-      console.log('receipt', receipt);
-    });
-    // const receiptDetail = await web3.eth.getTransactionReceipt(receipt.transactionHash);
-
-
-    console.log('receptTest', receipt);
-    // console.log('receiptDetail', receiptDetail);
-
-    expectEvent(receipt, 'SmartContractReceivedEth');
+    expectEvent(receipt,'SmartContractReceivedEth', {sender: bob, amount: oneEther, message:'Smart contract received ETHEREUM'})
   });
-  */
+
+
 
   it('Test getApproverList function', async ()=>{
      const approveList = await multiSignWallet.getApproverList();
@@ -63,8 +53,7 @@ contract('MultisignWallet Testing', async([alice, bob, admin, dev, minter]) => {
     expectEvent(createTrans, 'CreatedTransaction', {transactionId:'1', message:'Transaction was added to the queue'});
   });
 
-
-  it.only('Test approveTransaction function', async () => {
+  it('Test approveTransaction function', async () => {
     const adminBalanceBefore = await web3.eth.getBalance(admin);
     await multiSignWallet.createTransaction(oneEther, admin);
     await multiSignWallet.approveTransaction(0, {from: alice});
@@ -73,11 +62,19 @@ contract('MultisignWallet Testing', async([alice, bob, admin, dev, minter]) => {
     assert.equal(adminBalanceAfter-adminBalanceBefore, oneEther);
   });
 
+  it('Test only approval modifier for createTransaction', async ()=>{
+    await expectRevert(multiSignWallet.createTransaction(oneEther, bob, {from :dev}), 'Only approve address allowed');
+  });
+
+  it('Test only approval modifier for approveTransaction', async ()=>{
+    await multiSignWallet.createTransaction(oneEther, admin);
+    await expectRevert(multiSignWallet.approveTransaction(0, {from: dev}), 'Only approve address allowed');
+  });
+
   it('Test getBalance function', async() => {
     const contractBalance = await multiSignWallet.getBalance();
     assert.equal(contractBalance.toString(), oneEther);
   });
 
   //Todo: Continue to check how to test receve() function event
-  //Todo: Test only Approval Function for both approve transaction and create transaction
 });
