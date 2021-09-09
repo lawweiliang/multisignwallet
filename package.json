@@ -1,0 +1,21 @@
+{
+  "name": "multisignwallet",
+  "version": "1.0.0",
+  "description": "<img src=\"./gitimage/multiwalletidea.png\" width=\"1000\">",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@openzeppelin/test-helpers": "^0.5.13"
+  },
+  "dependencies": {
+    "ethereumjs-testrpc": "^6.0.3"
+  }
+}

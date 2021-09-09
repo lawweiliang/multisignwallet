@@ -9,6 +9,7 @@ contract MultiSignWallet {
     
     mapping(address=>mapping(uint=>bool)) approverTransactionList;
 
+
     struct Transaction{
         uint id;
         uint amount;
@@ -19,10 +20,10 @@ contract MultiSignWallet {
     
     Transaction[] transactionList;
     
-    
     event CreatedTransaction(uint transactionId, string message);
     event TransactionSent(Transaction transaction, string message);
-    
+    event SmartContractReceivedEth(address sender, uint amount, string message);
+
     constructor(address[] memory _approverList, uint _minNoApproval){
         approverList = _approverList;
         minNoApproval = _minNoApproval;
@@ -37,6 +38,7 @@ contract MultiSignWallet {
         return transactionList;
     } 
     
+    
     function createTransaction(uint _amount, address payable _to) public onlyApproval{
         transactionList.push(
           Transaction(transactionList.length, _amount, _to, 0, false) 
@@ -47,9 +49,10 @@ contract MultiSignWallet {
    
     }
     
+    
     function approveTransaction(uint _transactionId) public onlyApproval{
         require(transactionList[_transactionId].sent == false, "Transaction had been sent");
-        require(approverTransactionList[msg.sender][_transactionId] == true, "Cannot approve transfer twice");
+        require(approverTransactionList[msg.sender][_transactionId] == false, "Cannot approve transfer twice");
     
         approverTransactionList[msg.sender][_transactionId] = true;
         transactionList[_transactionId].noApproval++;
@@ -76,7 +79,7 @@ contract MultiSignWallet {
         _;
     }
     
-    event SmartContractReceivedEth(address sender, uint amount, string message);
+    
     receive() external payable{
         emit SmartContractReceivedEth(msg.sender, msg.value, "Smart contract received ETHEREUM");
     }
@@ -85,8 +88,8 @@ contract MultiSignWallet {
         return address(this).balance;
     }
     
-    function invest() external payable{
-        emit SmartContractReceivedEth(msg.sender, msg.value, "Smart contract received ETHEREUM");
-    }
+    // function invest() external payable{
+    //     emit SmartContractReceivedEth(msg.sender, msg.value, "Smart contract received ETHEREUM");
+    // }
     
 }
